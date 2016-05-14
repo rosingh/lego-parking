@@ -9,7 +9,8 @@ import lejos.util.Delay;
  * 
  */
 public class LightTest {
-	private static int ROBOT_WIDTH = 200;
+	private static int ROBOT_WIDTH = 165;
+	private static int ROBOT_LENGTH = 203;
 	private static int WHEEL_DIAMETER = 56;
 	public static void main(String[] args) {
 		LightSensor sensor = new LightSensor(SensorPort.S3);
@@ -66,9 +67,10 @@ public class LightTest {
 		return (tachos/360.0)*Math.PI*WHEEL_DIAMETER;
 	}
 	
-	public static void linePark(DifferentialPilot pilot, double width){
-		pilot.travel(width*-3/4);
-		pilot.arc(100, -90);
+	public static void linePark(DifferentialPilot pilot, double parkingWidth){
+		//pilot.travel(width*-3/4);
+		pilot.travel(-ROBOT_LENGTH/2);
+		pilot.arc(parkingWidth / 2, -90);
 		pilot.travel(150);
 	}
 }
