@@ -46,6 +46,7 @@ public class LightTest {
 					distance = convertTachosToMilli(Motor.A.getTachoCount());
 					Motor.A.resetTachoCount();
 					Motor.C.resetTachoCount();
+					linePark(pilot, distance);
 					break;
 				}
 			}
@@ -65,5 +66,10 @@ public class LightTest {
 		return (tachos/360.0)*Math.PI*WHEEL_DIAMETER;
 	}
 	
+	public static void linePark(DifferentialPilot pilot, double width){
+		pilot.travel(width*-3/4);
+		pilot.arc(100, -90);
+		pilot.travel(150);
+	}
 }
 
