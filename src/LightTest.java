@@ -18,7 +18,7 @@ public class LightTest {
 	
 	public static void main(String[] args) {
 		FRONT_SENSOR.ping();
-		SIDE_SENSOR.ping();
+		SIDE_SENSOR.continuous();
 		
 		LightSensor sensor = new LightSensor(SensorPort.S3);
 		sensor.setFloodlight(true);
@@ -38,7 +38,7 @@ public class LightTest {
 		while (!canFit(distance)) {
 			int current_value = sensor.getNormalizedLightValue();
 			System.out.println(current_value + " vs " + white_value); 
-			
+			pilot.forward();
 			//detected black line
 			if (current_value <= white_value - threshold) {
 				pilot.forward();
@@ -61,10 +61,11 @@ public class LightTest {
 					//try to park if it can fit
 					System.out.println("DETECTED CAR? "+detectedCar);
 					if(!detectedCar && canFit(distance)){
+						System.out.println("HERE??????");
 						linePark(pilot, distance);
 						break;
 					}
-					
+					System.out.println("HERE");
 					//cant fit-> go forward until passes black line
 					pilot.forward();
 					while(sensor.getNormalizedLightValue() <= white_value - threshold);
@@ -73,7 +74,7 @@ public class LightTest {
 					pilot.stop();
 					Motor.A.resetTachoCount();
 					Motor.C.resetTachoCount();
-					
+					distance = 0;
 					detectedCar = false;
 				}
 			}
@@ -103,6 +104,7 @@ public class LightTest {
 	
 	public static void linePark(DifferentialPilot pilot, double parkingWidth){
 		int ultrasonicError = 25;
+		SIDE_SENSOR.ping();
 		//pilot.travel(width*-3/4);
 		pilot.travel(-ROBOT_LENGTH/2);
 		//pilot.arc(parkingWidth / 2, -90);
