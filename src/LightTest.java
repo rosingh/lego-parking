@@ -23,12 +23,13 @@ public class LightTest {
 		sensor.setFloodlight(true);
 		
 		DifferentialPilot pilot = new DifferentialPilot(56, 120, Motor.A, Motor.C);
-		pilot.setTravelSpeed(90);
-		pilot.setRotateSpeed(100);
+		pilot.setTravelSpeed(60);
+		pilot.setRotateSpeed(15);
 		
 		// get initial light reading to account for ambient light
+		Delay.msDelay(1000);
 		int initVal = sensor.getNormalizedLightValue();
-		int threshold = 10;
+		int threshold = 10 ;
 		double distance = Integer.MIN_VALUE;
 		boolean sawLine = false;
 		int white_value = initVal;
@@ -78,7 +79,7 @@ public class LightTest {
 		//pilot.arc(parkingWidth / 2, -90);
 		pilot.arc(parkingWidth, -90);
 		FRONT_SENSOR.ping();
-		Delay.msDelay(25);
+		Delay.msDelay(50);
 		int curbDistance = FRONT_SENSOR.getDistance();
 		pilot.travel(curbDistance*10-10);
 		System.out.println("DISTANCE TO CURB : "+curbDistance);
