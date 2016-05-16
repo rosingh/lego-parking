@@ -77,7 +77,7 @@ public class LightTest {
 		//pilot.travel(width*-3/4);
 		pilot.travel(-ROBOT_LENGTH/2);
 		//pilot.arc(parkingWidth / 2, -90);
-		pilot.arc(parkingWidth, -90);
+		pilot.arc((parkingWidth+ROBOT_WIDTH/2)/2, -90);
 		FRONT_SENSOR.ping();
 		Delay.msDelay(50);
 		int curbDistance = FRONT_SENSOR.getDistance();
