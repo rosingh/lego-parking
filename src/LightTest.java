@@ -2,17 +2,23 @@ import lejos.nxt.Button;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.navigation.DifferentialPilot;
 import lejos.util.Delay;
 
-/* NOTE: ALL DISTANCES ARE IN MM!
- * 
- */
+/* NOTE: ALL DISTANCES ARE IN MM! */
 public class LightTest {
 	private static int ROBOT_WIDTH = 165;
 	private static int ROBOT_LENGTH = 203;
 	private static int WHEEL_DIAMETER = 56;
+	
+	private static final UltrasonicSensor FRONT_SENSOR = new UltrasonicSensor(SensorPort.S2);
+	private static final UltrasonicSensor SIDE_SENSOR = new UltrasonicSensor(SensorPort.S1);
+	
 	public static void main(String[] args) {
+		FRONT_SENSOR.ping();
+		SIDE_SENSOR.ping();
+		
 		LightSensor sensor = new LightSensor(SensorPort.S3);
 		sensor.setFloodlight(true);
 		
@@ -48,11 +54,10 @@ public class LightTest {
 					Motor.A.resetTachoCount();
 					Motor.C.resetTachoCount();
 					linePark(pilot, distance);
+					System.out.println("CAN FIT? "+canFit(distance));
 					break;
 				}
 			}
-			//else
-				//white_value = current_value;
 		}
 		System.out.println("Distance : " + distance);
 		Button.waitForAnyPress();
@@ -70,8 +75,13 @@ public class LightTest {
 	public static void linePark(DifferentialPilot pilot, double parkingWidth){
 		//pilot.travel(width*-3/4);
 		pilot.travel(-ROBOT_LENGTH/2);
-		pilot.arc(parkingWidth / 2, -90);
-		pilot.travel(150);
+		//pilot.arc(parkingWidth / 2, -90);
+		pilot.arc(parkingWidth, -90);
+		FRONT_SENSOR.ping();
+		Delay.msDelay(25);
+		int curbDistance = FRONT_SENSOR.getDistance();
+		pilot.travel(curbDistance*10-10);
+		System.out.println("DISTANCE TO CURB : "+curbDistance);
 	}
 }
 
