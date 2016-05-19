@@ -16,10 +16,9 @@ public class ParallelPark {
 	private static final UltrasonicSensor SIDE_SENSOR = new UltrasonicSensor(SensorPort.S1);
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		SIDE_SENSOR.continuous();
 		FRONT_SENSOR.ping();
-		
+		Delay.msDelay(24);
 		DifferentialPilot pilot = new DifferentialPilot(56, 120, Motor.A, Motor.C);
 		pilot.setTravelSpeed(60);
 		pilot.setRotateSpeed(15);
@@ -27,7 +26,6 @@ public class ParallelPark {
 		double distance = Integer.MIN_VALUE;
 		
 		int error = 5;
-		boolean found_spot = false;
 		while(!canFit(distance)){
 			Motor.A.resetTachoCount();
 			Motor.C.resetTachoCount();
@@ -40,7 +38,7 @@ public class ParallelPark {
 				pilot.stop();
 				distance = convertTachosToMilli(Motor.A.getTachoCount());
 			}
-			//theres an obstacle - this is not a parkig sp
+			//theres an obstacle - this is not a parking spot
 			else{
 				while(SIDE_SENSOR.getDistance() < DISTANCE_TO_SIDEWALK);
 			 	
@@ -58,6 +56,8 @@ public class ParallelPark {
 	
 	public static void parallelParkBack(DifferentialPilot pilot, double parkingWidth, int prevCurbDist) {
 		int ultrasonicError = 25;
+		SIDE_SENSOR.ping();
+		Delay.msDelay(24);
 		int yDistance = SIDE_SENSOR.getDistance() * 10;
 		double radius;
 		//if this was the first time we're trying to back in, clear the back, and account for it in radius
@@ -72,38 +72,38 @@ public class ParallelPark {
 			angle = 45;
 		radius = radius/2;
 		System.out.println("RADIUS : "+radius + " ANGLE "+angle);
-		pilot.arc(-radius, angle);
+		pilot.arc(-radius, angle, false);
 		
 		//moves the robot diagonally to the back
 		SIDE_SENSOR.ping();
-		Delay.msDelay(50);
+		Delay.msDelay(24);
 		//double diagDistance = SIDE_SENSOR.getDistance() * 10 - radius - ultrasonicError;
-		double diagDistance = SIDE_SENSOR.getDistance() * 10 /Math.atan(angle);
-		System.out.println("CLOSING IN : " + diagDistance);
+		double diagDistance = SIDE_SENSOR.getDistance() * 10 /Math.tan(angle*Math.PI/180) - ultrasonicError;
+		System.out.println("CLOSING IN : " + SIDE_SENSOR.getDistance());
 		if(SIDE_SENSOR.getDistance() != 255 && diagDistance > 0)
-			pilot.travel(-diagDistance);
+			pilot.travel(-diagDistance, false);
 		
 		//straightens robot
-		pilot.arc(radius/2, -angle);
+		pilot.arc(radius/2, -angle, false);
 		
 		//measure distance from curb
 		SIDE_SENSOR.ping();
-		Delay.msDelay(50);
+		Delay.msDelay(24);
 		int curbDistance = SIDE_SENSOR.getDistance();
 		System.out.println("CURB1 " + curbDistance);
 		//should we go closer?
 		if(curbDistance > ACCEPTABLE_DISTANCE_FROM_CURB && curbDistance < prevCurbDist){
 			//back up the robot as far as it can
 			FRONT_SENSOR.ping();
-			Delay.msDelay(50);
+			Delay.msDelay(24);
 			double distanceToFront = FRONT_SENSOR.getDistance()*10 - ultrasonicError;
 			if(distanceToFront > parkingWidth - ROBOT_WIDTH)
 				distanceToFront = parkingWidth - ROBOT_WIDTH;
 			//pilot.travel(distanceToFront);
-			double distanceBehind = (parkingWidth-distanceToFront-ROBOT_LENGTH/2);
-			//System.out.println("BEHIND ME : "+distanceBehind);
-			if(distanceBehind > 0){
-				pilot.travel(-distanceBehind);
+			double distanceBehind = parkingWidth-distanceToFront-ROBOT_LENGTH*3/4.0-ultrasonicError;
+			System.out.println("FRONT SENSOR : "+FRONT_SENSOR.getDistance()+"\n GO BACK : "+distanceBehind);
+			if(FRONT_SENSOR.getDistance() != 255 && distanceBehind > 0){
+				pilot.travel(-distanceBehind, false);
 			}
 			
 			if(prevCurbDist == Integer.MAX_VALUE)
@@ -126,37 +126,37 @@ public class ParallelPark {
 			angle = 45;
 		radius = radius/2;
 		//System.out.println("RADIUS : "+radius + " ANGLE "+angle);
-		pilot.arc(-radius, -angle);
+		pilot.arc(-radius, -angle, false);
 		
 		//moves the robot diagonally to the front
 		FRONT_SENSOR.ping();
-		Delay.msDelay(50);
+		Delay.msDelay(24);
 		double headSpace = FRONT_SENSOR.getDistance() * 10;
 		if(FRONT_SENSOR.getDistance() != 255 && headSpace > parkingWidth)
 			headSpace = parkingWidth;
-		double diagDistance = headSpace - radius - ultrasonicError - 20;
+		double diagDistance = headSpace - radius*1.5 - ultrasonicError;
 		//System.out.println("CLOSING IN : " + diagDistance);
 		if(diagDistance > 0)
-			pilot.travel(diagDistance);
+			pilot.travel(diagDistance, false);
 		
 		//straigtens out the robot
 		pilot.arc(radius/2, angle);
 		
 		//gets distance from curb
 		SIDE_SENSOR.ping();
-		Delay.msDelay(50);
+		Delay.msDelay(24);
 		int curbDistance = SIDE_SENSOR.getDistance();
 		System.out.println("CURB2 " + curbDistance);
 		
 		if(curbDistance > ACCEPTABLE_DISTANCE_FROM_CURB && curbDistance < prevCurbDist){
 			//moves the robot to the very front
 			FRONT_SENSOR.ping();
-			Delay.msDelay(50);
+			Delay.msDelay(24);
 			if(FRONT_SENSOR.getDistance() != 255){
 				double distanceToFront = FRONT_SENSOR.getDistance()*10 - ultrasonicError;
 				if(distanceToFront > parkingWidth - ROBOT_WIDTH)
 					distanceToFront = parkingWidth - ROBOT_WIDTH;
-				pilot.travel(distanceToFront);
+				pilot.travel(distanceToFront, false);
 			}
 			//now try to get closer :)
 			parallelParkBack(pilot, parkingWidth, curbDistance);
